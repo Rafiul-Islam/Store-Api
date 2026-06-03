@@ -4,6 +4,7 @@ import com.storeapi.dtos.ProductDto;
 import com.storeapi.entities.Product;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 
 import java.util.List;
 
@@ -12,4 +13,7 @@ public interface ProductMapper {
   @Mapping(target = "categoryId", source = "category.id")
   ProductDto toDto(Product product);
   List<ProductDto> toDtoList(List<Product> product);
+  @Mapping(target = "category", ignore = true)
+  Product toEntity(ProductDto productDto);
+  void updateEntity(ProductDto productDto, @MappingTarget Product product);
 }

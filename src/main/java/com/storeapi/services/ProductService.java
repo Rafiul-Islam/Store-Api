@@ -1,6 +1,10 @@
 package com.storeapi.services;
 
+import com.storeapi.dtos.ProductDto;
+import com.storeapi.entities.Category;
 import com.storeapi.entities.Product;
+import com.storeapi.mappers.ProductMapper;
+import com.storeapi.repositories.CategoryRepository;
 import com.storeapi.repositories.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -11,6 +15,8 @@ import java.util.List;
 @Service
 public class ProductService {
   private final ProductRepository productRepository;
+  private final ProductMapper productMapper;
+  private final CategoryRepository categoryRepository;
 
   public List<Product> findAll(Byte categoryId) {
     if (categoryId == null) return productRepository.findAll();
@@ -19,5 +25,25 @@ public class ProductService {
 
   public Product findById(long id) {
     return productRepository.findById(id).orElseThrow(() -> new RuntimeException("Product not found"));
+  }
+
+  public Product save(ProductDto productDto) {
+    Category existingCategory  = categoryRepository.findById(productDto.getCategoryId()).orElseThrow(() -> new RuntimeException("Category not found"));
+    Product product = productMapper.toEntity(productDto);
+    product.setCategory(existingCategory);
+    return productRepository.save(product);
+  }
+
+  public Product update(Long productId, ProductDto productDto) {
+    Category existingCategory  = categoryRepository.findById(productDto.getCategoryId()).orElseThrow(() -> new RuntimeException("Category not found"));
+    Product existingProduct = productRepository.findById(productId).orElseThrow(() -> new RuntimeException("Product not found"));
+    productMapper.updateEntity(productDto, existingProduct);
+    existingProduct.setCategory(existingCategory);
+    return productRepository.save(existingProduct);
+  }
+
+  public void delete(Long productId) {
+    Product existingProduct = productRepository.findById(productId).orElseThrow(() -> new RuntimeException("Product not found"));
+    productRepository.delete(existingProduct);
   }
 }

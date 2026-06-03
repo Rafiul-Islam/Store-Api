@@ -31,7 +31,7 @@ public class UserServices {
 
   public User save(RegisterUserRequest request) {
     userRepository.findByEmail(request.getEmail()).ifPresent((user) -> {
-      throw new RuntimeException("Email already exists" );
+      throw new RuntimeException("Email is already registered" );
     });
     User user = userMapper.toEntity(request);
     return userRepository.save(user);

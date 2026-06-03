@@ -1,6 +1,7 @@
 package com.storeapi.services;
 
 import com.storeapi.dtos.RegisterUserRequest;
+import com.storeapi.dtos.UpdateUserRequest;
 import com.storeapi.entities.User;
 import com.storeapi.mappers.UserMapper;
 import com.storeapi.repositories.UserRepository;
@@ -31,6 +32,11 @@ public class UserServices {
 
   public User saveUser(RegisterUserRequest request) {
     User user = userMapper.toEntity(request);
+    return userRepository.save(user);
+  }
+
+  public User updateUser(UpdateUserRequest request, User user) {
+    userMapper.updateEntity(request, user);
     return userRepository.save(user);
   }
 }

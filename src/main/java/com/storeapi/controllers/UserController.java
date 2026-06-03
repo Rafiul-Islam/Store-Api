@@ -1,6 +1,7 @@
 package com.storeapi.controllers;
 
 import com.storeapi.dtos.RegisterUserRequest;
+import com.storeapi.dtos.UpdateUserRequest;
 import com.storeapi.dtos.UserDto;
 import com.storeapi.entities.User;
 import com.storeapi.mappers.UserMapper;
@@ -59,5 +60,19 @@ public class UserController {
 
     URI uri = uriComponentsBuilder.path("/api/users/{userId}" ).buildAndExpand(savedUser.getId()).toUri();
     return ResponseEntity.created(uri).body(userDto);
+  }
+
+  @PutMapping("/{userId}")
+  private ResponseEntity<UserDto> updateUser(
+    @PathVariable(name = "userId") Long userId,
+    @RequestBody UpdateUserRequest request
+    ) {
+    Optional<User> optionalUser = userServices.getUserById(userId);
+    if (optionalUser.isEmpty()) {
+      return ResponseEntity.badRequest().build();
+    }
+    User updatedUser = userServices.updateUser(request, optionalUser.get());
+    UserDto userDto = userMapper.toDto(updatedUser);
+    return ResponseEntity.ok(userDto);
   }
 }

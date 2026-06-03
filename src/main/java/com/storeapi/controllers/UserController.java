@@ -15,7 +15,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
-import java.util.Set;
 
 @RequiredArgsConstructor
 @RestController
@@ -29,7 +28,6 @@ public class UserController {
   private List<UserDto> getUsers(
     @RequestParam(required = false, defaultValue = "", name = "sort" ) String sortBy
   ) {
-    if (!Set.of("name", "email" ).contains(sortBy)) sortBy = "name";
     List<User> users = userServices.findAll(sortBy);
     return userMapper.toDtoList(users);
   }

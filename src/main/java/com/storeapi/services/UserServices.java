@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -19,8 +20,9 @@ public class UserServices {
   private final UserRepository userRepository;
   private final UserMapper userMapper;
 
-  public List<User> findAll(String sort) {
-    return userRepository.findAll(Sort.by(sort));
+  public List<User> findAll(String sortBy) {
+    if (!Set.of("name", "email" ).contains(sortBy)) sortBy = "name";
+    return userRepository.findAll(Sort.by(sortBy));
   }
 
   public User findById(long userId) {

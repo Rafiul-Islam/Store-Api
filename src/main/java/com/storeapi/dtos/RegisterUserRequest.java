@@ -1,5 +1,6 @@
 package com.storeapi.dtos;
 
+import com.storeapi.validations.LowerCase;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -13,6 +14,7 @@ public class RegisterUserRequest {
 
   @NotBlank(message = "Email is required" )
   @Email(message = "Email must be valid" )
+  @LowerCase(message = "Email must be in lowercase" )
   private String email;
 
   @NotBlank(message = "Password is required" )

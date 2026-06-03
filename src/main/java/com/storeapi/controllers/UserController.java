@@ -15,7 +15,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 @RequiredArgsConstructor
@@ -31,7 +30,7 @@ public class UserController {
     @RequestParam(required = false, defaultValue = "", name = "sort" ) String sortBy
   ) {
     if (!Set.of("name", "email" ).contains(sortBy)) sortBy = "name";
-    List<User> users = userServices.getUsers(sortBy);
+    List<User> users = userServices.findAll(sortBy);
     return userMapper.toDtoList(users);
   }
 
@@ -39,13 +38,9 @@ public class UserController {
   private ResponseEntity<UserDto> getUserById(
     @PathVariable(name = "userId" ) Long userId
   ) {
-    Optional<User> optionalUser = userServices.getUserById(userId);
-    if (optionalUser.isPresent()) {
-      User user = optionalUser.get();
-      UserDto userDto = userMapper.toDto(user);
-      return ResponseEntity.ok(userDto);
-    }
-    return ResponseEntity.notFound().build();
+    User user = userServices.findById(userId);
+    UserDto userDto = userMapper.toDto(user);
+    return ResponseEntity.ok(userDto);
   }
 
   @PostMapping
@@ -53,11 +48,7 @@ public class UserController {
     @RequestBody RegisterUserRequest request,
     UriComponentsBuilder uriComponentsBuilder
   ) {
-    Optional<User> optionalUser = userServices.getUserByEmail(request.getEmail());
-    if (optionalUser.isPresent()) {
-      return ResponseEntity.badRequest().build();
-    }
-    User savedUser = userServices.saveUser(request);
+    User savedUser = userServices.save(request);
     UserDto userDto = userMapper.toDto(savedUser);
 
     URI uri = uriComponentsBuilder.path("/api/users/{userId}" ).buildAndExpand(savedUser.getId()).toUri();
@@ -69,11 +60,7 @@ public class UserController {
     @PathVariable(name = "userId" ) Long userId,
     @RequestBody UpdateUserRequest request
   ) {
-    Optional<User> optionalUser = userServices.getUserById(userId);
-    if (optionalUser.isEmpty()) {
-      return ResponseEntity.badRequest().build();
-    }
-    User updatedUser = userServices.updateUser(request, optionalUser.get());
+    User updatedUser = userServices.update(userId, request);
     UserDto userDto = userMapper.toDto(updatedUser);
     return ResponseEntity.ok(userDto);
   }
@@ -82,11 +69,7 @@ public class UserController {
   private ResponseEntity<Void> deleteUser(
     @PathVariable(name = "userId" ) Long userId
   ) {
-    Optional<User> optionalUser = userServices.getUserById(userId);
-    if (optionalUser.isEmpty()) {
-      return ResponseEntity.notFound().build();
-    }
-    userServices.deleteUser(userId);
+    userServices.delete(userId);
     return ResponseEntity.noContent().build();
   }
 

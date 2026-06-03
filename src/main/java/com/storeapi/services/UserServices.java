@@ -8,7 +8,6 @@ import com.storeapi.mappers.UserMapper;
 import com.storeapi.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,30 +19,31 @@ public class UserServices {
   private final UserRepository userRepository;
   private final UserMapper userMapper;
 
-  public List<User> getUsers(String sort) {
+  public List<User> findAll(String sort) {
     return userRepository.findAll(Sort.by(sort));
   }
 
-  public Optional<User> getUserById(long id) {
-    return userRepository.findById(id);
+  public User findById(long userId) {
+    return userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found" ));
   }
 
-  public Optional<User> getUserByEmail(String email) {
-    return userRepository.findByEmail(email);
-  }
-
-  public User saveUser(RegisterUserRequest request) {
+  public User save(RegisterUserRequest request) {
+    userRepository.findByEmail(request.getEmail()).ifPresent((user) -> {
+      throw new RuntimeException("Email already exists" );
+    });
     User user = userMapper.toEntity(request);
     return userRepository.save(user);
   }
 
-  public User updateUser(UpdateUserRequest request, User user) {
-    userMapper.updateEntity(request, user);
-    return userRepository.save(user);
+  public User update(Long userId, UpdateUserRequest request) {
+    User savedUser = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found" ));
+    userMapper.updateEntity(request, savedUser);
+    return userRepository.save(savedUser);
   }
 
-  public void deleteUser(Long userId) {
-    userRepository.deleteById(userId);
+  public void delete(Long userId) {
+    User savedUser = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found" ));
+    userRepository.delete(savedUser);
   }
 
   public Boolean changePassword(Long userId, ChangePasswordRequest request) {

@@ -1,12 +1,10 @@
 package com.storeapi.entities;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.ColumnDefault;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
+
+import java.math.BigDecimal;
 
 @Getter
 @Setter
@@ -28,5 +26,14 @@ public class CartItem {
 
   @Column(name = "quantity")
   private Integer quantity;
+
+  public void addToCart(Cart cart) {
+    this.cart = cart;
+    cart.getCartItems().add(this);
+  }
+
+  public BigDecimal getTotalPrice() {
+    return product.getPrice().multiply(BigDecimal.valueOf(quantity));
+  }
 
 }

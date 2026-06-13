@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
@@ -27,15 +28,19 @@ public class ProductService {
     return productRepository.findById(id).orElseThrow(() -> new RuntimeException("Product not found"));
   }
 
+  public Optional<Product> getById(long id) {
+    return productRepository.findById(id);
+  }
+
   public Product save(ProductDto productDto) {
-    Category existingCategory  = categoryRepository.findById(productDto.getCategoryId()).orElseThrow(() -> new RuntimeException("Category not found"));
+    Category existingCategory = categoryRepository.findById(productDto.getCategoryId()).orElseThrow(() -> new RuntimeException("Category not found"));
     Product product = productMapper.toEntity(productDto);
     product.setCategory(existingCategory);
     return productRepository.save(product);
   }
 
   public Product update(Long productId, ProductDto productDto) {
-    Category existingCategory  = categoryRepository.findById(productDto.getCategoryId()).orElseThrow(() -> new RuntimeException("Category not found"));
+    Category existingCategory = categoryRepository.findById(productDto.getCategoryId()).orElseThrow(() -> new RuntimeException("Category not found"));
     Product existingProduct = productRepository.findById(productId).orElseThrow(() -> new RuntimeException("Product not found"));
     productMapper.updateEntity(productDto, existingProduct);
     existingProduct.setCategory(existingCategory);

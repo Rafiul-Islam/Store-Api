@@ -7,6 +7,8 @@ import com.storeapi.dtos.UpdateCartItemRequest;
 import com.storeapi.entities.Cart;
 import com.storeapi.mappers.CartMapper;
 import com.storeapi.services.CartService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -17,14 +19,20 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.net.URI;
 import java.util.UUID;
 
+@Tag(name = "Carts", description = "All cart related endpoints")
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/carts")
 public class CartController {
+
   private final CartService cartService;
   private final CartMapper cartMapper;
 
   @GetMapping("{cartId}")
+  @Operation(
+    summary = "Get cart by ID",
+    description = "Retrieve a cart along with its items using cart UUID."
+  )
   public ResponseEntity<CartDto> getCart(
     @PathVariable(name = "cartId") UUID cartId
   ) {
@@ -34,16 +42,29 @@ public class CartController {
   }
 
   @PostMapping
+  @Operation(
+    summary = "Create new cart",
+    description = "Create a new empty cart and return its details."
+  )
   public ResponseEntity<CartDto> createCart(
     UriComponentsBuilder uriComponentsBuilder
   ) {
     Cart savedCart = cartService.save();
     CartDto cartDto = cartMapper.toDto(savedCart);
-    URI uri = uriComponentsBuilder.path("/api/carts/{cartId}").buildAndExpand(cartDto.getId()).toUri();
+
+    URI uri = uriComponentsBuilder
+      .path("/api/carts/{cartId}")
+      .buildAndExpand(cartDto.getId())
+      .toUri();
+
     return ResponseEntity.created(uri).body(cartDto);
   }
 
   @PostMapping("/{cartId}/items")
+  @Operation(
+    summary = "Add item to cart",
+    description = "Add a product to the cart or increase quantity if already exists."
+  )
   public ResponseEntity<CartItemDto> addToCart(
     @PathVariable(name = "cartId") UUID cartId,
     @Valid @RequestBody AddItemToCartRequest request
@@ -53,16 +74,24 @@ public class CartController {
   }
 
   @PutMapping("/{cartId}/items/{productId}")
+  @Operation(
+    summary = "Update cart item",
+    description = "Update quantity of a specific product inside the cart."
+  )
   public ResponseEntity<CartItemDto> updateCartItem(
     @PathVariable(name = "cartId") UUID cartId,
     @PathVariable(name = "productId") Long productId,
     @Valid @RequestBody UpdateCartItemRequest request
   ) {
     CartItemDto cartItemDto = cartService.updateCartItem(cartId, productId, request);
-    return new ResponseEntity<>(cartItemDto, HttpStatus.OK);
+    return ResponseEntity.ok(cartItemDto);
   }
 
   @DeleteMapping("/{cartId}/items/{productId}")
+  @Operation(
+    summary = "Remove item from cart",
+    description = "Delete a specific product from the cart."
+  )
   public ResponseEntity<CartItemDto> deleteCartItem(
     @PathVariable(name = "cartId") UUID cartId,
     @PathVariable(name = "productId") Long productId
@@ -72,6 +101,10 @@ public class CartController {
   }
 
   @DeleteMapping("/{cartId}/items")
+  @Operation(
+    summary = "Clear cart",
+    description = "Remove all items from the cart."
+  )
   public ResponseEntity<CartItemDto> clearCart(
     @PathVariable(name = "cartId") UUID cartId
   ) {

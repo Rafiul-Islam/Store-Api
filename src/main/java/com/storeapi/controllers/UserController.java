@@ -7,22 +7,21 @@ import com.storeapi.dtos.UserDto;
 import com.storeapi.entities.User;
 import com.storeapi.mappers.UserMapper;
 import com.storeapi.services.UserServices;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.FieldError;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @RequiredArgsConstructor
 @RestController
+@Tag(name = "Users", description = "All user related endpoints")
 @RequestMapping("/api/users")
 public class UserController {
 
@@ -30,6 +29,10 @@ public class UserController {
   private final UserMapper userMapper;
 
   @GetMapping
+  @Operation(
+    summary = "Get all users",
+    description = "Retrieve list of users with optional sorting."
+  )
   private List<UserDto> getUsers(
     @RequestParam(required = false, defaultValue = "", name = "sort") String sortBy
   ) {
@@ -38,6 +41,10 @@ public class UserController {
   }
 
   @GetMapping("/{userId}")
+  @Operation(
+    summary = "Get user by ID",
+    description = "Fetch a single user by their unique ID."
+  )
   private ResponseEntity<UserDto> getUserById(
     @PathVariable(name = "userId") Long userId
   ) {
@@ -47,6 +54,10 @@ public class UserController {
   }
 
   @PostMapping
+  @Operation(
+    summary = "Register new user",
+    description = "Create a new user account."
+  )
   private ResponseEntity<UserDto> createUser(
     @Valid @RequestBody RegisterUserRequest request,
     UriComponentsBuilder uriComponentsBuilder
@@ -54,11 +65,19 @@ public class UserController {
     User savedUser = userServices.save(request);
     UserDto userDto = userMapper.toDto(savedUser);
 
-    URI uri = uriComponentsBuilder.path("/api/users/{userId}").buildAndExpand(savedUser.getId()).toUri();
+    URI uri = uriComponentsBuilder
+      .path("/api/users/{userId}")
+      .buildAndExpand(savedUser.getId())
+      .toUri();
+
     return ResponseEntity.created(uri).body(userDto);
   }
 
   @PutMapping("/{userId}")
+  @Operation(
+    summary = "Update user",
+    description = "Update user details by ID."
+  )
   private ResponseEntity<UserDto> updateUser(
     @PathVariable(name = "userId") Long userId,
     @RequestBody UpdateUserRequest request
@@ -69,6 +88,10 @@ public class UserController {
   }
 
   @DeleteMapping("/{userId}")
+  @Operation(
+    summary = "Delete user",
+    description = "Remove a user from the system by ID."
+  )
   private ResponseEntity<Void> deleteUser(
     @PathVariable(name = "userId") Long userId
   ) {
@@ -77,6 +100,10 @@ public class UserController {
   }
 
   @PostMapping("/{userId}/change-password")
+  @Operation(
+    summary = "Change user password",
+    description = "Update password for a user after verifying current credentials."
+  )
   private ResponseEntity<Void> changePassword(
     @PathVariable(name = "userId") Long userId,
     @RequestBody ChangePasswordRequest request

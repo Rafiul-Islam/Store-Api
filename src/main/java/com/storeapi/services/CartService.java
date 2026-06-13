@@ -47,8 +47,6 @@ public class CartService {
 
   public CartItemDto updateCartItem(UUID cartId, Long productId, UpdateCartItemRequest request) {
     Cart existingCart = cartRepository.findCartWithItemsByCartId(cartId).orElseThrow(() -> new RuntimeException("Cart not found"));
-    Optional<Product> productOptional = productService.getById(productId);
-    if (productOptional.isEmpty()) throw new RuntimeException("Product not found");
 
     CartItem cartItem = existingCart.getCartItem(productId);
 
@@ -56,5 +54,17 @@ public class CartService {
     cartRepository.save(existingCart);
 
     return cartMapper.toDto(updatedCartItem);
+  }
+
+  public void deleteCartItem(UUID cartId, Long productId) {
+    Cart existingCart = cartRepository.findCartWithItemsByCartId(cartId).orElseThrow(() -> new RuntimeException("Cart not found"));
+    existingCart.removeItem(productId);
+    cartRepository.save(existingCart);
+  }
+
+  public void clearCart(UUID cartId) {
+    Cart existingCart = cartRepository.findCartWithItemsByCartId(cartId).orElseThrow(() -> new RuntimeException("Cart not found"));
+    existingCart.clearCart();
+    cartRepository.save(existingCart);
   }
 }

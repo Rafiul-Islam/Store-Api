@@ -3,6 +3,7 @@ package com.storeapi.controllers;
 import com.storeapi.dtos.AddItemToCartRequest;
 import com.storeapi.dtos.CartDto;
 import com.storeapi.dtos.CartItemDto;
+import com.storeapi.dtos.UpdateCartItemRequest;
 import com.storeapi.entities.Cart;
 import com.storeapi.mappers.CartMapper;
 import com.storeapi.services.CartService;
@@ -49,5 +50,15 @@ public class CartController {
   ) {
     CartItemDto cartItemDto = cartService.addItemToCart(cartId, request);
     return new ResponseEntity<>(cartItemDto, HttpStatus.CREATED);
+  }
+
+  @PutMapping("/{cartId}/items/{productId}")
+  public ResponseEntity<CartItemDto> updateCartItem(
+    @PathVariable(name = "cartId") UUID cartId,
+    @PathVariable(name = "productId") Long productId,
+    @Valid @RequestBody UpdateCartItemRequest request
+  ) {
+    CartItemDto cartItemDto = cartService.updateCartItem(cartId, productId, request);
+    return new ResponseEntity<>(cartItemDto, HttpStatus.OK);
   }
 }

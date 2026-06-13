@@ -2,6 +2,7 @@ package com.storeapi.services;
 
 import com.storeapi.dtos.AddItemToCartRequest;
 import com.storeapi.dtos.CartItemDto;
+import com.storeapi.dtos.UpdateCartItemRequest;
 import com.storeapi.entities.Cart;
 import com.storeapi.entities.CartItem;
 import com.storeapi.entities.Product;
@@ -29,23 +30,12 @@ public class CartService {
 
   @Transactional
   public CartItemDto addItemToCart(UUID cartId, AddItemToCartRequest request) {
-    Cart existingCart = cartRepository.findById(cartId).orElseThrow(() -> new RuntimeException("Cart not found"));
+    Cart existingCart = cartRepository.findCartWithItemsByCartId(cartId).orElseThrow(() -> new RuntimeException("Cart not found"));
     Optional<Product> productOptional = productService.getById(request.getProductId());
     if (productOptional.isEmpty()) throw new RuntimeException("Product not found");
 
-    CartItem cartItem = existingCart.getCartItems().stream()
-      .filter(item -> item.getProduct().getId().equals(request.getProductId()))
-      .findFirst()
-      .orElse(null);
+    CartItem cartItem = existingCart.addCartItem(productOptional.get());
 
-    if (cartItem != null) {
-      cartItem.setQuantity(cartItem.getQuantity() + 1);
-    } else {
-      cartItem = new CartItem();
-      cartItem.setProduct(productOptional.get());
-      cartItem.setQuantity(1);
-      cartItem.addToCart(existingCart);
-    }
     cartRepository.save(existingCart);
 
     return cartMapper.toDto(cartItem);
@@ -53,5 +43,18 @@ public class CartService {
 
   public Cart findById(UUID cartId) {
     return cartRepository.findCartWithItemsByCartId(cartId).orElseThrow(() -> new RuntimeException("Cart not found"));
+  }
+
+  public CartItemDto updateCartItem(UUID cartId, Long productId, UpdateCartItemRequest request) {
+    Cart existingCart = cartRepository.findCartWithItemsByCartId(cartId).orElseThrow(() -> new RuntimeException("Cart not found"));
+    Optional<Product> productOptional = productService.getById(productId);
+    if (productOptional.isEmpty()) throw new RuntimeException("Product not found");
+
+    CartItem cartItem = existingCart.getCartItem(productId);
+
+    CartItem updatedCartItem = cartMapper.toUpdateEntity(request, cartItem);
+    cartRepository.save(existingCart);
+
+    return cartMapper.toDto(updatedCartItem);
   }
 }

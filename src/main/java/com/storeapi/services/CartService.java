@@ -12,6 +12,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -66,5 +67,9 @@ public class CartService {
     Cart existingCart = cartRepository.findCartWithItemsByCartId(cartId).orElseThrow(() -> new RuntimeException("Cart not found"));
     existingCart.clearCart();
     cartRepository.save(existingCart);
+  }
+
+  public List<Cart> findAll() {
+    return cartRepository.findAllWithItems();
   }
 }

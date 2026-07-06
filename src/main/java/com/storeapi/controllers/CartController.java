@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
+import java.util.List;
 import java.util.UUID;
 
 @Tag(name = "Carts", description = "All cart related endpoints")
@@ -27,6 +28,13 @@ public class CartController {
 
   private final CartService cartService;
   private final CartMapper cartMapper;
+
+  @GetMapping
+  public ResponseEntity<List<CartDto>> getAllCarts() {
+    List<Cart> carts = cartService.findAll();
+    List<CartDto> cartDtos = cartMapper.toDtoList(carts);
+    return ResponseEntity.ok(cartDtos);
+  }
 
   @GetMapping("{cartId}")
   @Operation(

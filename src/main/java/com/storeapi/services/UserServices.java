@@ -8,6 +8,7 @@ import com.storeapi.mappers.UserMapper;
 import com.storeapi.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,6 +20,7 @@ import java.util.Set;
 public class UserServices {
   private final UserRepository userRepository;
   private final UserMapper userMapper;
+  private final PasswordEncoder passwordEncoder;
 
   public List<User> findAll(String sortBy) {
     if (!Set.of("name", "email" ).contains(sortBy)) sortBy = "name";
@@ -34,6 +36,7 @@ public class UserServices {
       throw new RuntimeException("Email is already registered" );
     });
     User user = userMapper.toEntity(request);
+    user.setPassword(passwordEncoder.encode(user.getPassword()));
     return userRepository.save(user);
   }
 

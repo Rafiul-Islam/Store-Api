@@ -1,6 +1,8 @@
 package com.storeapi.exceptions;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -11,6 +13,11 @@ import java.util.Map;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
+  @ExceptionHandler(BadCredentialsException.class)
+  public ResponseEntity<String> handleBadCredentials(BadCredentialsException e) {
+    return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
+  }
+
   @ExceptionHandler(MethodArgumentNotValidException.class)
   public ResponseEntity<Map<String, String>> handleValidationExceptions(MethodArgumentNotValidException exception) {
     Map<String, String> exceptions = new HashMap<>();

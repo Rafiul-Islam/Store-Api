@@ -1,7 +1,8 @@
 package com.storeapi.controllers;
 
 import com.storeapi.dtos.LoginRequest;
-import com.storeapi.services.AuthService;
+import com.storeapi.dtos.LoginResponse;
+import com.storeapi.services.JwtService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -17,11 +18,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
-  private final AuthService authService;
   private final AuthenticationManager authenticationManager;
+  private final JwtService jwtService;
 
   @PostMapping("/login")
-  public ResponseEntity<Void> login(
+  public ResponseEntity<LoginResponse> login(
     @RequestBody @Valid LoginRequest loginRequest
   ) {
     authenticationManager.authenticate(
@@ -30,6 +31,9 @@ public class AuthController {
         loginRequest.getPassword()
       )
     );
-    return ResponseEntity.status(HttpStatus.OK).build();
+
+    String authToken = jwtService.generateToken(loginRequest.getEmail());
+
+    return ResponseEntity.status(HttpStatus.OK).body(new LoginResponse(authToken));
   }
 }

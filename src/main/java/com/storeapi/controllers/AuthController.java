@@ -39,7 +39,9 @@ public class AuthController {
       )
     );
 
-    String authToken = jwtService.generateToken(loginRequest.getEmail());
+    var user = userServices.getByEmail(loginRequest.getEmail()).orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+    String authToken = jwtService.generateToken(user);
 
     return ResponseEntity.status(HttpStatus.OK).body(new LoginResponse(authToken));
   }
@@ -59,9 +61,9 @@ public class AuthController {
   public ResponseEntity<UserDto> getCurrentUser() {
     var authentication = SecurityContextHolder.getContext().getAuthentication();
     assert authentication != null;
-    String email = (String) authentication.getPrincipal();
+    Long id = (Long) authentication.getPrincipal();
 
-    Optional<User> existingUser = userServices.getByEmail(email);
+    Optional<User> existingUser = userServices.getById(id);
     if (existingUser.isEmpty()) throw new UsernameNotFoundException("User not found");
 
     var userDto = userMapper.toDto(existingUser.get());

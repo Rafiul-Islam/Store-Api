@@ -1,5 +1,6 @@
 package com.storeapi.services;
 
+import com.storeapi.entities.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -17,9 +18,11 @@ public class JwtService {
   @Value("${spring.jwt.token-expiration-in-seconds}")
   private Long jwtTokenExpirationInSeconds;
 
-  public String generateToken(String email) {
+  public String generateToken(User user) {
     return Jwts.builder()
-      .setSubject(email)
+      .setSubject(String.valueOf(user.getId()))
+      .claim("email", user.getEmail())
+      .claim("name", String.valueOf(user.getName()))
       .issuedAt(new Date())
       .expiration(new Date(System.currentTimeMillis() + 1000 * jwtTokenExpirationInSeconds))
       .signWith(Keys.hmacShaKeyFor(jwtSecret.getBytes()))
@@ -43,7 +46,7 @@ public class JwtService {
       .getPayload();
   }
 
-  public String getEmailFromToken(String token) {
-    return getClaims(token).getSubject();
+  public Long getUserIdFromToken(String token) {
+    return Long.valueOf(getClaims(token).getSubject());
   }
 }

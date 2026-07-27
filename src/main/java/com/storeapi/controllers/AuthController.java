@@ -38,6 +38,7 @@ public class AuthController {
   public ResponseEntity<String> validateToken(
     @RequestHeader("Authorization") String authHeader
   ) {
+    System.out.println("Validate Called....");
     String jwtToken = authHeader.replace("Bearer ", "");
     boolean result = jwtService.validateToken(jwtToken);
     if (!result) return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid token");

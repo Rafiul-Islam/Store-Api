@@ -78,6 +78,7 @@ public class AuthController {
     assert authentication != null;
     Long id = (Long) authentication.getPrincipal();
 
+    assert id != null;
     Optional<User> existingUser = userServices.getById(id);
     if (existingUser.isEmpty()) throw new UsernameNotFoundException("User not found");
 

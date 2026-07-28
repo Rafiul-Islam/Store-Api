@@ -7,8 +7,11 @@ import com.storeapi.entities.User;
 import com.storeapi.mappers.UserMapper;
 import com.storeapi.services.JwtService;
 import com.storeapi.services.UserServices;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -28,9 +31,13 @@ public class AuthController {
   private final UserServices userServices;
   private final UserMapper userMapper;
 
+  @Value("${spring.jwt.refresh-token-expiration-in-seconds}")
+  private int jwtRefreshTokenExpirationInSeconds;
+
   @PostMapping("/login")
   public ResponseEntity<LoginResponse> login(
-    @RequestBody @Valid LoginRequest loginRequest
+    @RequestBody @Valid LoginRequest loginRequest,
+    HttpServletResponse response
   ) {
     authenticationManager.authenticate(
       new UsernamePasswordAuthenticationToken(
@@ -41,9 +48,17 @@ public class AuthController {
 
     var user = userServices.getByEmail(loginRequest.getEmail()).orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-    String authToken = jwtService.generateToken(user);
+    String accessToken = jwtService.generateAccessToken(user);
+    String refreshToken = jwtService.generateRefreshToken(user);
 
-    return ResponseEntity.status(HttpStatus.OK).body(new LoginResponse(authToken));
+    var cookie = new Cookie("refresh_token", refreshToken);
+    cookie.setHttpOnly(true);
+    cookie.setPath("/auth/refresh");
+    cookie.setMaxAge(jwtRefreshTokenExpirationInSeconds);
+    cookie.setSecure(true);
+    response.addCookie(cookie);
+
+    return ResponseEntity.status(HttpStatus.OK).body(new LoginResponse(accessToken));
   }
 
   @PostMapping("/validate")

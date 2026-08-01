@@ -2,6 +2,7 @@ package com.storeapi.services;
 
 import com.storeapi.configs.JwtConfig;
 import com.storeapi.entities.User;
+import com.storeapi.utils.Jwt;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import lombok.RequiredArgsConstructor;
@@ -13,26 +14,27 @@ import java.util.Date;
 @Service
 public class JwtService {
 
-   private final JwtConfig jwtConfig;
+  private final JwtConfig jwtConfig;
 
-  public String generateAccessToken(User user) {
+  public Jwt generateAccessToken(User user) {
     return generateToken(user, Long.parseLong(jwtConfig.getAccessTokenExpirationInSeconds()));
   }
 
-  public String generateRefreshToken(User user) {
+  public Jwt generateRefreshToken(User user) {
     return generateToken(user, Long.parseLong(jwtConfig.getRefreshTokenExpirationInSeconds()));
   }
 
-  private String generateToken(User user, long TokenExpirationInSeconds) {
-    return Jwts.builder()
+  private Jwt generateToken(User user, long TokenExpirationInSeconds) {
+    var claims = Jwts.claims()
       .setSubject(String.valueOf(user.getId()))
-      .claim("email", user.getEmail())
-      .claim("name", String.valueOf(user.getName()))
-      .claim("role", String.valueOf(user.getRole()))
-      .issuedAt(new Date())
-      .expiration(new Date(System.currentTimeMillis() + 1000 * TokenExpirationInSeconds))
-      .signWith(jwtConfig.getSecretKey())
-      .compact();
+      .add("name", String.valueOf(user.getName()))
+      .add("email", user.getEmail())
+      .add("role", String.valueOf(user.getRole()))
+      .setIssuedAt(new Date())
+      .setExpiration(new Date(System.currentTimeMillis() + 1000 * TokenExpirationInSeconds))
+      .build();
+
+    return new Jwt(claims, jwtConfig.getSecretKey());
   }
 
   public boolean validateToken(String token) {
@@ -52,11 +54,12 @@ public class JwtService {
       .getPayload();
   }
 
-  public Long getUserIdFromToken(String token) {
-    return Long.valueOf(getClaims(token).getSubject());
-  }
-
-  public String getUserRoleFromToken(String token) {
-    return getClaims(token).get("role", String.class);
+  public Jwt parseToken(String token) {
+    try {
+      var claims = getClaims(token);
+      return new Jwt(claims, jwtConfig.getSecretKey());
+    } catch (Exception e) {
+      return null;
+    }
   }
 }

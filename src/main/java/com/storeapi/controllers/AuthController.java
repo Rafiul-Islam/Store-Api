@@ -46,17 +46,17 @@ public class AuthController {
 
     var user = userServices.getByEmail(loginRequest.getEmail()).orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-    String accessToken = jwtService.generateAccessToken(user);
-    String refreshToken = jwtService.generateRefreshToken(user);
+    var accessToken = jwtService.generateAccessToken(user);
+    var refreshToken = jwtService.generateRefreshToken(user);
 
-    var cookie = new Cookie("refresh_token", refreshToken);
+    var cookie = new Cookie("refresh_token", refreshToken.toString());
     cookie.setHttpOnly(true);
     cookie.setPath("/auth/refresh");
     cookie.setMaxAge(Integer.parseInt(jwtConfig.getRefreshTokenExpirationInSeconds()));
     cookie.setSecure(true);
     response.addCookie(cookie);
 
-    return ResponseEntity.status(HttpStatus.OK).body(new LoginResponse(accessToken));
+    return ResponseEntity.status(HttpStatus.OK).body(new LoginResponse(accessToken.toString()));
   }
 
   @PostMapping("/validate")
@@ -88,10 +88,11 @@ public class AuthController {
   public ResponseEntity<LoginResponse> refreshToken(
     @CookieValue(value = "refresh_token") String refreshToken
   ) {
-    boolean result = jwtService.validateToken(refreshToken);
-    if (!result) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new LoginResponse("Invalid refresh token"));
-    var user = userServices.getById(jwtService.getUserIdFromToken(refreshToken)).orElseThrow(() -> new UsernameNotFoundException("User not found"));
-    String accessToken = jwtService.generateAccessToken(user);
+    var jwt = jwtService.parseToken(refreshToken);
+    boolean result = jwt.isExpired();
+    if (result) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new LoginResponse("Invalid refresh token"));
+    var user = userServices.getById(jwt.getUserId()).orElseThrow(() -> new UsernameNotFoundException("User not found"));
+    String accessToken = jwtService.generateAccessToken(user).toString();
     return ResponseEntity.status(HttpStatus.OK).body(new LoginResponse(accessToken));
   }
 }

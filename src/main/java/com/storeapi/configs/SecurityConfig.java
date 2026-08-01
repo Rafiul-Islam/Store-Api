@@ -1,5 +1,6 @@
 package com.storeapi.configs;
 
+import com.storeapi.enums.Role;
 import com.storeapi.filters.JwtAuthenticationFilter;
 import com.storeapi.services.UserDetailsService;
 import lombok.RequiredArgsConstructor;
@@ -37,6 +38,7 @@ public class SecurityConfig {
       .authorizeHttpRequests(auth ->
         auth
           .requestMatchers("/api/auth/login").permitAll()
+          .requestMatchers("/api/admin/**").hasRole(Role.ADMIN.name())
           .requestMatchers("/api/auth/refresh").permitAll()
           .requestMatchers("/api/carts/**").permitAll()
           .requestMatchers(HttpMethod.POST, "/api/users").permitAll()
@@ -46,9 +48,10 @@ public class SecurityConfig {
         jwtAuthenticationFilter,
         UsernamePasswordAuthenticationFilter.class
       )
-      .exceptionHandling(exceptionHandlingConfigurer ->
-        exceptionHandlingConfigurer.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
-      );
+      .exceptionHandling(exceptionHandlingConfigurer -> {
+        exceptionHandlingConfigurer.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED));
+        exceptionHandlingConfigurer.accessDeniedHandler((request, response, accessDeniedException) -> response.setStatus(HttpStatus.FORBIDDEN.value()));
+      });
 
     return http.build();
   }

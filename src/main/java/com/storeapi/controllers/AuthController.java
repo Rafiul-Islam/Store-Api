@@ -1,5 +1,6 @@
 package com.storeapi.controllers;
 
+import com.storeapi.configs.JwtConfig;
 import com.storeapi.dtos.LoginRequest;
 import com.storeapi.dtos.LoginResponse;
 import com.storeapi.dtos.UserDto;
@@ -11,7 +12,6 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -30,9 +30,7 @@ public class AuthController {
   private final JwtService jwtService;
   private final UserServices userServices;
   private final UserMapper userMapper;
-
-  @Value("${spring.jwt.refresh-token-expiration-in-seconds}")
-  private int jwtRefreshTokenExpirationInSeconds;
+  private final JwtConfig jwtConfig;
 
   @PostMapping("/login")
   public ResponseEntity<LoginResponse> login(
@@ -54,7 +52,7 @@ public class AuthController {
     var cookie = new Cookie("refresh_token", refreshToken);
     cookie.setHttpOnly(true);
     cookie.setPath("/auth/refresh");
-    cookie.setMaxAge(jwtRefreshTokenExpirationInSeconds);
+    cookie.setMaxAge(Integer.parseInt(jwtConfig.getRefreshTokenExpirationInSeconds()));
     cookie.setSecure(true);
     response.addCookie(cookie);
 

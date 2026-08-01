@@ -4,6 +4,7 @@ import com.storeapi.dtos.ChangePasswordRequest;
 import com.storeapi.dtos.RegisterUserRequest;
 import com.storeapi.dtos.UpdateUserRequest;
 import com.storeapi.entities.User;
+import com.storeapi.enums.Role;
 import com.storeapi.mappers.UserMapper;
 import com.storeapi.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -37,6 +38,7 @@ public class UserServices {
     });
     User user = userMapper.toEntity(request);
     user.setPassword(passwordEncoder.encode(user.getPassword()));
+    user.setRole(Role.USER);
     return userRepository.save(user);
   }
 

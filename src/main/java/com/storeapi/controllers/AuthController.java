@@ -83,4 +83,15 @@ public class AuthController {
     var userDto = userMapper.toDto(existingUser.get());
     return ResponseEntity.ok(userDto);
   }
+
+  @PostMapping("/refresh")
+  public ResponseEntity<LoginResponse> refreshToken(
+    @CookieValue(value = "refresh_token") String refreshToken
+  ) {
+    boolean result = jwtService.validateToken(refreshToken);
+    if (!result) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new LoginResponse("Invalid refresh token"));
+    var user = userServices.getById(jwtService.getUserIdFromToken(refreshToken)).orElseThrow(() -> new UsernameNotFoundException("User not found"));
+    String accessToken = jwtService.generateAccessToken(user);
+    return ResponseEntity.status(HttpStatus.OK).body(new LoginResponse(accessToken));
+  }
 }

@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -17,6 +18,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @RequiredArgsConstructor
@@ -35,6 +37,7 @@ public class SecurityConfig {
       .authorizeHttpRequests(auth ->
         auth
           .requestMatchers("/api/auth/login").permitAll()
+          .requestMatchers("/api/auth/refresh").permitAll()
           .requestMatchers("/api/carts/**").permitAll()
           .requestMatchers(HttpMethod.POST, "/api/users").permitAll()
           .anyRequest().authenticated()
@@ -42,6 +45,9 @@ public class SecurityConfig {
       .addFilterBefore(
         jwtAuthenticationFilter,
         UsernamePasswordAuthenticationFilter.class
+      )
+      .exceptionHandling(exceptionHandlingConfigurer ->
+        exceptionHandlingConfigurer.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
       );
 
     return http.build();

@@ -29,6 +29,10 @@ public class Jwt {
     return Role.valueOf(claims.get("role", String.class));
   }
 
+  public String getJti() {
+    return claims.getId();
+  }
+
   public String toString() {
     return Jwts.builder()
       .setClaims(claims)

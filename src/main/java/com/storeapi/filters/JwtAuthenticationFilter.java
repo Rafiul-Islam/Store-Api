@@ -1,5 +1,6 @@
 package com.storeapi.filters;
 
+import com.storeapi.repositories.ActiveTokenRepository;
 import com.storeapi.services.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -15,11 +16,13 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.UUID;
 
 @RequiredArgsConstructor
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
   private final JwtService jwtService;
+  private final ActiveTokenRepository activeTokenRepository;
 
   @Override
   protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -32,6 +35,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     var jwtToken = authHeader.replace("Bearer ", "");
     var jwt = jwtService.parseToken(jwtToken);
     if (jwt == null || jwt.isExpired()) {
+      filterChain.doFilter(request, response);
+      return;
+    }
+
+    boolean isTokenActive = activeTokenRepository.existsByToken(
+      UUID.fromString(jwtService.parseToken(jwtToken).getJti())
+    );
+    if (!isTokenActive) {
       filterChain.doFilter(request, response);
       return;
     }

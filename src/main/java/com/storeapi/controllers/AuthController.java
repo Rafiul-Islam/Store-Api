@@ -4,12 +4,15 @@ import com.storeapi.configs.JwtConfig;
 import com.storeapi.dtos.LoginRequest;
 import com.storeapi.dtos.LoginResponse;
 import com.storeapi.dtos.UserDto;
+import com.storeapi.entities.ActiveToken;
 import com.storeapi.entities.User;
 import com.storeapi.mappers.UserMapper;
+import com.storeapi.repositories.ActiveTokenRepository;
 import com.storeapi.services.JwtService;
 import com.storeapi.services.UserServices;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -21,6 +24,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
+import java.util.UUID;
 
 @RequiredArgsConstructor
 @RestController
@@ -31,6 +35,7 @@ public class AuthController {
   private final UserServices userServices;
   private final UserMapper userMapper;
   private final JwtConfig jwtConfig;
+  private final ActiveTokenRepository activeTokenRepository;
 
   @PostMapping("/login")
   public ResponseEntity<LoginResponse> login(
@@ -46,26 +51,29 @@ public class AuthController {
 
     var user = userServices.getByEmail(loginRequest.getEmail()).orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-    var accessToken = jwtService.generateAccessToken(user);
-    var refreshToken = jwtService.generateRefreshToken(user);
+    var accessToken = jwtService.generateAccessToken(user).toString();
+    var refreshToken = jwtService.generateRefreshToken(user).toString();
 
-    var cookie = new Cookie("refresh_token", refreshToken.toString());
+    activeTokenRepository.save(new ActiveToken(
+      UUID.fromString(jwtService.parseToken(accessToken).getJti())
+    ));
+
+    var cookie = new Cookie("refresh_token", refreshToken);
     cookie.setHttpOnly(true);
     cookie.setPath("/auth/refresh");
     cookie.setMaxAge(Integer.parseInt(jwtConfig.getRefreshTokenExpirationInSeconds()));
     cookie.setSecure(true);
     response.addCookie(cookie);
 
-    return ResponseEntity.status(HttpStatus.OK).body(new LoginResponse(accessToken.toString()));
+    return ResponseEntity.status(HttpStatus.OK).body(new LoginResponse(accessToken));
   }
 
   @PostMapping("/validate")
   public ResponseEntity<String> validateToken(
     @RequestHeader("Authorization") String authHeader
   ) {
-    System.out.println("Validate Called....");
     String jwtToken = authHeader.replace("Bearer ", "");
-    boolean result = jwtService.validateToken(jwtToken);
+    boolean result = jwtService.parseToken(jwtToken).isExpired();
     if (!result) return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid token");
     return ResponseEntity.ok("Token is valid");
   }
@@ -84,8 +92,10 @@ public class AuthController {
     return ResponseEntity.ok(userDto);
   }
 
+  @Transactional
   @PostMapping("/refresh")
   public ResponseEntity<LoginResponse> refreshToken(
+    @RequestHeader("Authorization") String authHeader,
     @CookieValue(value = "refresh_token") String refreshToken
   ) {
     var jwt = jwtService.parseToken(refreshToken);
@@ -93,6 +103,31 @@ public class AuthController {
     if (result) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new LoginResponse("Invalid refresh token"));
     var user = userServices.getById(jwt.getUserId()).orElseThrow(() -> new UsernameNotFoundException("User not found"));
     String accessToken = jwtService.generateAccessToken(user).toString();
+
+    String prevAccessToken = authHeader.replace("Bearer ", "");
+    activeTokenRepository.deleteById(
+      UUID.fromString(jwtService.parseToken(prevAccessToken).getJti())
+    );
+
     return ResponseEntity.status(HttpStatus.OK).body(new LoginResponse(accessToken));
+  }
+
+  @Transactional
+  @PostMapping("/logout")
+  public ResponseEntity<String> logout(
+    @RequestHeader("Authorization") String authHeader,
+    HttpServletResponse response
+  ) {
+    String existingAccessToken = authHeader.replace("Bearer ", "");
+    activeTokenRepository.deleteById(UUID.fromString(jwtService.parseToken(existingAccessToken).getJti()));
+
+    var cookie = new Cookie("refresh_token", "");
+    cookie.setHttpOnly(true);
+    cookie.setPath("/auth/refresh");
+    cookie.setMaxAge(0);
+    cookie.setSecure(true);
+    response.addCookie(cookie);
+
+    return ResponseEntity.status(HttpStatus.OK).body("Logged out successfully");
   }
 }

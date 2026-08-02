@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.UUID;
 
 @RequiredArgsConstructor
 @Service
@@ -25,7 +26,10 @@ public class JwtService {
   }
 
   private Jwt generateToken(User user, long TokenExpirationInSeconds) {
+    String tokenId = UUID.randomUUID().toString();
+
     var claims = Jwts.claims()
+      .setId(tokenId)
       .setSubject(String.valueOf(user.getId()))
       .add("name", String.valueOf(user.getName()))
       .add("email", user.getEmail())
@@ -35,15 +39,6 @@ public class JwtService {
       .build();
 
     return new Jwt(claims, jwtConfig.getSecretKey());
-  }
-
-  public boolean validateToken(String token) {
-    try {
-      var claims = getClaims(token);
-      return claims.getExpiration().after(new Date());
-    } catch (Exception e) {
-      return false;
-    }
   }
 
   private Claims getClaims(String token) {

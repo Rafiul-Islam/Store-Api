@@ -7,7 +7,7 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.LinkedHashSet;
+import java.util.HashSet;
 import java.util.Set;
 
 @Getter
@@ -34,7 +34,12 @@ public class Order {
   @Column(name = "created_at", insertable = false, updatable = false)
   private LocalDateTime createdAt;
 
-  @OneToMany(mappedBy = "order")
-  private Set<OrderItem> items = new LinkedHashSet<>();
+  @OneToMany(mappedBy = "order", cascade = CascadeType.PERSIST)
+  private Set<OrderItem> items = new HashSet<>();
+
+  public void addOrderItem(OrderItem orderItem) {
+    items.add(orderItem);
+    orderItem.setOrder(this);
+  }
 
 }

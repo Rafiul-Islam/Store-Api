@@ -15,8 +15,6 @@ import java.util.UUID;
 public interface ActiveTokenRepository extends JpaRepository<ActiveToken, UUID> {
   boolean existsByTokenId(UUID token);
 
-  void deleteByTokenId(UUID token);
-
   @Transactional
   @Modifying
   @Query("DELETE FROM ActiveToken a WHERE a.expiryDate < :now")

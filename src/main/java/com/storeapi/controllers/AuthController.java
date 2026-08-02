@@ -1,73 +1,33 @@
 package com.storeapi.controllers;
 
-import com.storeapi.configs.JwtConfig;
 import com.storeapi.dtos.LoginRequest;
 import com.storeapi.dtos.LoginResponse;
 import com.storeapi.dtos.UserDto;
-import com.storeapi.entities.ActiveToken;
 import com.storeapi.entities.User;
 import com.storeapi.mappers.UserMapper;
-import com.storeapi.repositories.ActiveTokenRepository;
-import com.storeapi.services.JwtService;
-import com.storeapi.services.UserServices;
-import jakarta.servlet.http.Cookie;
+import com.storeapi.services.AuthService;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Optional;
-import java.util.UUID;
 
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
-  private final AuthenticationManager authenticationManager;
-  private final JwtService jwtService;
-  private final UserServices userServices;
   private final UserMapper userMapper;
-  private final JwtConfig jwtConfig;
-  private final ActiveTokenRepository activeTokenRepository;
+  private final AuthService authService;
 
   @PostMapping("/login")
   public ResponseEntity<LoginResponse> login(
     @RequestBody @Valid LoginRequest loginRequest,
     HttpServletResponse response
   ) {
-    authenticationManager.authenticate(
-      new UsernamePasswordAuthenticationToken(
-        loginRequest.getEmail(),
-        loginRequest.getPassword()
-      )
-    );
-
-    var user = userServices.getByEmail(loginRequest.getEmail()).orElseThrow(() -> new UsernameNotFoundException("User not found"));
-
-    var accessToken = jwtService.generateAccessToken(user).toString();
-    var refreshToken = jwtService.generateRefreshToken(user).toString();
-
-    var jwt = jwtService.parseToken(accessToken);
-
-    activeTokenRepository.save(new ActiveToken(
-      UUID.fromString(jwt.getJti()),
-      jwt.getExpiration()
-    ));
-
-    var cookie = new Cookie("refresh_token", refreshToken);
-    cookie.setHttpOnly(true);
-    cookie.setPath("/auth/refresh");
-    cookie.setMaxAge(Integer.parseInt(jwtConfig.getRefreshTokenExpirationInSeconds()));
-    cookie.setSecure(true);
-    response.addCookie(cookie);
-
+    String accessToken = authService.login(loginRequest, response);
     return ResponseEntity.status(HttpStatus.OK).body(new LoginResponse(accessToken));
   }
 
@@ -75,23 +35,15 @@ public class AuthController {
   public ResponseEntity<String> validateToken(
     @RequestHeader("Authorization") String authHeader
   ) {
-    String jwtToken = authHeader.replace("Bearer ", "");
-    boolean isAccessTokenExpired = jwtService.parseToken(jwtToken).isExpired();
-    if (isAccessTokenExpired) return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid token");
+    boolean isAccessTokenValid = authService.validateAccessToken(authHeader);
+    if (!isAccessTokenValid) return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Token is invalid");
     return ResponseEntity.ok("Token is valid");
   }
 
   @GetMapping("/me")
   public ResponseEntity<UserDto> getCurrentUser() {
-    var authentication = SecurityContextHolder.getContext().getAuthentication();
-    assert authentication != null;
-    Long id = (Long) authentication.getPrincipal();
-
-    assert id != null;
-    Optional<User> existingUser = userServices.getById(id);
-    if (existingUser.isEmpty()) throw new UsernameNotFoundException("User not found");
-
-    var userDto = userMapper.toDto(existingUser.get());
+    User existingUser = authService.getLoggedInUser().orElseThrow(() -> new UsernameNotFoundException("User not found"));
+    var userDto = userMapper.toDto(existingUser);
     return ResponseEntity.ok(userDto);
   }
 
@@ -100,13 +52,8 @@ public class AuthController {
   public ResponseEntity<LoginResponse> refreshToken(
     @CookieValue(value = "refresh_token") String refreshToken
   ) {
-    var jwt = jwtService.parseToken(refreshToken);
-    boolean result = jwt.isExpired();
-    if (result) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new LoginResponse("Invalid refresh token"));
-    var user = userServices.getById(jwt.getUserId()).orElseThrow(() -> new UsernameNotFoundException("User not found"));
-    String accessToken = jwtService.generateAccessToken(user).toString();
-
-    return ResponseEntity.status(HttpStatus.OK).body(new LoginResponse(accessToken));
+    String newAccessToken = authService.refreshAccessToken(refreshToken);
+    return ResponseEntity.status(HttpStatus.OK).body(new LoginResponse(newAccessToken));
   }
 
   @Transactional
@@ -115,16 +62,7 @@ public class AuthController {
     @RequestHeader("Authorization") String authHeader,
     HttpServletResponse response
   ) {
-    String existingAccessToken = authHeader.replace("Bearer ", "");
-    activeTokenRepository.deleteById(UUID.fromString(jwtService.parseToken(existingAccessToken).getJti()));
-
-    var cookie = new Cookie("refresh_token", "");
-    cookie.setHttpOnly(true);
-    cookie.setPath("/auth/refresh");
-    cookie.setMaxAge(0);
-    cookie.setSecure(true);
-    response.addCookie(cookie);
-
+    authService.logout(authHeader, response);
     return ResponseEntity.status(HttpStatus.OK).body("Logged out successfully");
   }
 }

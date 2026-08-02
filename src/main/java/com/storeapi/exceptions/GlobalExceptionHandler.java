@@ -19,8 +19,9 @@ public class GlobalExceptionHandler {
   private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
   @ExceptionHandler(BadCredentialsException.class)
-  public ResponseEntity<String> handleBadCredentials(BadCredentialsException e) {
-    return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
+  public ResponseEntity<String> handleBadCredentials(BadCredentialsException exception) {
+    log.error("BadCredentialsException: {}", exception.getMessage());
+    return new ResponseEntity<>(exception.getMessage(), HttpStatus.UNAUTHORIZED);
   }
 
   @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -31,12 +32,13 @@ public class GlobalExceptionHandler {
       String errorMessage = err.getDefaultMessage();
       exceptions.put(fieldName, errorMessage);
     });
+    log.error("{}", exceptions);
     return ResponseEntity.badRequest().body(exceptions);
   }
 
   @ExceptionHandler(HttpMessageNotReadableException.class)
-  public ResponseEntity<Map<String, String>> handleJsonParseException(HttpMessageNotReadableException ex) {
-    log.error("JSON parse error: {}", ex.getMessage());
+  public ResponseEntity<Map<String, String>> handleJsonParseException(HttpMessageNotReadableException exception) {
+    log.error("HttpMessageNotReadableException: {}", exception.getMessage());
     return ResponseEntity
       .status(HttpStatus.BAD_REQUEST)
       .body(Map.of("error", "Invalid request parameters"));
@@ -44,6 +46,9 @@ public class GlobalExceptionHandler {
 
   @ExceptionHandler(Exception.class)
   public ResponseEntity<String> handleExceptions(Exception exception) {
-    return ResponseEntity.badRequest().body(exception.getMessage());
+    log.error("Exception: {}", exception.getMessage());
+    return ResponseEntity.badRequest().body(
+      Map.of("error", exception.getMessage()).toString()
+    );
   }
 }

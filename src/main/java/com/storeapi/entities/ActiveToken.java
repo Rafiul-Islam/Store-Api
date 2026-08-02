@@ -1,9 +1,9 @@
 package com.storeapi.entities;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @NoArgsConstructor
@@ -15,5 +15,8 @@ import java.util.UUID;
 public class ActiveToken {
   @Id
   @Column(name = "token")
-  private UUID token;
+  private UUID tokenId;
+
+  @Column(name = "expiry_date", nullable = false)
+  private LocalDateTime expiryDate;
 }

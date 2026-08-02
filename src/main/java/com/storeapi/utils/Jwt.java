@@ -6,6 +6,7 @@ import io.jsonwebtoken.Jwts;
 import lombok.Data;
 
 import javax.crypto.SecretKey;
+import java.time.LocalDateTime;
 
 @Data
 public class Jwt {
@@ -31,6 +32,10 @@ public class Jwt {
 
   public String getJti() {
     return claims.getId();
+  }
+
+  public LocalDateTime getExpiration() {
+    return claims.getExpiration().toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDateTime();
   }
 
   public String toString() {

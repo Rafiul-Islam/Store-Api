@@ -54,8 +54,11 @@ public class AuthController {
     var accessToken = jwtService.generateAccessToken(user).toString();
     var refreshToken = jwtService.generateRefreshToken(user).toString();
 
+    var jwt = jwtService.parseToken(accessToken);
+
     activeTokenRepository.save(new ActiveToken(
-      UUID.fromString(jwtService.parseToken(accessToken).getJti())
+      UUID.fromString(jwt.getJti()),
+      jwt.getExpiration()
     ));
 
     var cookie = new Cookie("refresh_token", refreshToken);
@@ -73,8 +76,8 @@ public class AuthController {
     @RequestHeader("Authorization") String authHeader
   ) {
     String jwtToken = authHeader.replace("Bearer ", "");
-    boolean result = jwtService.parseToken(jwtToken).isExpired();
-    if (!result) return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid token");
+    boolean isAccessTokenExpired = jwtService.parseToken(jwtToken).isExpired();
+    if (isAccessTokenExpired) return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid token");
     return ResponseEntity.ok("Token is valid");
   }
 

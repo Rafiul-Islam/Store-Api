@@ -39,7 +39,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       return;
     }
 
-    boolean isTokenActive = activeTokenRepository.existsByToken(
+    boolean isTokenActive = activeTokenRepository.existsByTokenId(
       UUID.fromString(jwtService.parseToken(jwtToken).getJti())
     );
     if (!isTokenActive) {

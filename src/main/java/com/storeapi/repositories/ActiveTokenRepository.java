@@ -8,7 +8,6 @@ import java.util.UUID;
 
 @Repository
 public interface ActiveTokenRepository extends JpaRepository<ActiveToken, UUID> {
-  boolean existsByToken(UUID token);
-
-  void deleteByToken(UUID token);
+  boolean existsByTokenId(UUID token);
+  void deleteByTokenId(UUID token);
 }

@@ -43,6 +43,8 @@ public class CheckoutService {
 
     orderRepository.save(order);
 
+    cartService.clearCart(existingCart.get().getId());
+
     return order.getId();
   }
 }

@@ -95,7 +95,6 @@ public class AuthController {
   @Transactional
   @PostMapping("/refresh")
   public ResponseEntity<LoginResponse> refreshToken(
-    @RequestHeader("Authorization") String authHeader,
     @CookieValue(value = "refresh_token") String refreshToken
   ) {
     var jwt = jwtService.parseToken(refreshToken);
@@ -103,11 +102,6 @@ public class AuthController {
     if (result) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new LoginResponse("Invalid refresh token"));
     var user = userServices.getById(jwt.getUserId()).orElseThrow(() -> new UsernameNotFoundException("User not found"));
     String accessToken = jwtService.generateAccessToken(user).toString();
-
-    String prevAccessToken = authHeader.replace("Bearer ", "");
-    activeTokenRepository.deleteById(
-      UUID.fromString(jwtService.parseToken(prevAccessToken).getJti())
-    );
 
     return ResponseEntity.status(HttpStatus.OK).body(new LoginResponse(accessToken));
   }

@@ -24,6 +24,14 @@ public class GlobalExceptionHandler {
     return new ResponseEntity<>(exception.getMessage(), HttpStatus.UNAUTHORIZED);
   }
 
+  @ExceptionHandler({CartNotFoundException.class, EmptyCartException.class})
+  public ResponseEntity<Map<String, String>> handleCartExceptions(EmptyCartException exception) {
+    log.error("CartException: {}", exception.getMessage());
+    return ResponseEntity.badRequest().body(
+      Map.of("error", exception.getMessage())
+    );
+  }
+
   @ExceptionHandler(MethodArgumentNotValidException.class)
   public ResponseEntity<Map<String, String>> handleValidationExceptions(MethodArgumentNotValidException exception) {
     Map<String, String> exceptions = new HashMap<>();

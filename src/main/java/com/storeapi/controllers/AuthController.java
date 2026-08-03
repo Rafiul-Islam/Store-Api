@@ -4,6 +4,7 @@ import com.storeapi.dtos.LoginRequest;
 import com.storeapi.dtos.LoginResponse;
 import com.storeapi.dtos.UserDto;
 import com.storeapi.entities.User;
+import com.storeapi.exceptions.UserNotFoundException;
 import com.storeapi.mappers.UserMapper;
 import com.storeapi.services.AuthService;
 import jakarta.servlet.http.HttpServletResponse;
@@ -42,7 +43,7 @@ public class AuthController {
 
   @GetMapping("/me")
   public ResponseEntity<UserDto> getCurrentUser() {
-    User existingUser = authService.getLoggedInUser().orElseThrow(() -> new UsernameNotFoundException("User not found"));
+    User existingUser = authService.getLoggedInUser().orElseThrow(() -> new UserNotFoundException("User not found"));
     var userDto = userMapper.toDto(existingUser);
     return ResponseEntity.ok(userDto);
   }

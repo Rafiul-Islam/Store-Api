@@ -4,6 +4,9 @@ import com.storeapi.dtos.CheckoutRequest;
 import com.storeapi.entities.Cart;
 import com.storeapi.entities.Order;
 import com.storeapi.entities.User;
+import com.storeapi.exceptions.CartNotFoundException;
+import com.storeapi.exceptions.EmptyCartException;
+import com.storeapi.exceptions.UserNotFoundException;
 import com.storeapi.repositories.OrderRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -16,8 +19,9 @@ public class CheckoutService {
   private final OrderRepository orderRepository;
 
   public long checkout(CheckoutRequest checkoutRequest) {
-    Cart existingCart = cartService.getById(checkoutRequest.getCartId()).orElseThrow(() -> new RuntimeException("Cart not found"));
-    User loggedInUser = authService.getLoggedInUser().orElseThrow(() -> new RuntimeException("User not found"));
+    Cart existingCart = cartService.getById(checkoutRequest.getCartId()).orElseThrow(CartNotFoundException::new);
+    User loggedInUser = authService.getLoggedInUser().orElseThrow(UserNotFoundException::new);
+    if (existingCart.isEmpty()) throw new EmptyCartException();
 
     Order order = Order.frommCart(existingCart, loggedInUser);
     orderRepository.save(order);

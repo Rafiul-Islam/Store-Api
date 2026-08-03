@@ -4,6 +4,7 @@ import com.storeapi.configs.JwtConfig;
 import com.storeapi.dtos.LoginRequest;
 import com.storeapi.entities.ActiveToken;
 import com.storeapi.entities.User;
+import com.storeapi.exceptions.UserNotFoundException;
 import com.storeapi.repositories.ActiveTokenRepository;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
@@ -37,7 +38,7 @@ public class AuthService {
       )
     );
 
-    var user = userServices.getByEmail(loginRequest.getEmail()).orElseThrow(() -> new UsernameNotFoundException("User not found"));
+    var user = userServices.getByEmail(loginRequest.getEmail()).orElseThrow(() -> new UserNotFoundException("User not found"));
 
     var accessToken = jwtService.generateAccessToken(user).toString();
     var refreshToken = jwtService.generateRefreshToken(user).toString();
@@ -79,7 +80,7 @@ public class AuthService {
     var jwt = jwtService.parseToken(refreshToken);
     boolean result = jwt.isExpired();
     if (result) throw new RuntimeException("Invalid refresh token");
-    var user = userServices.getById(jwt.getUserId()).orElseThrow(() -> new UsernameNotFoundException("User not found"));
+    var user = userServices.getById(jwt.getUserId()).orElseThrow(() -> new UserNotFoundException("User not found"));
     return jwtService.generateAccessToken(user).toString();
   }
 

@@ -5,6 +5,7 @@ import com.storeapi.dtos.RegisterUserRequest;
 import com.storeapi.dtos.UpdateUserRequest;
 import com.storeapi.entities.User;
 import com.storeapi.enums.Role;
+import com.storeapi.exceptions.UserNotFoundException;
 import com.storeapi.mappers.UserMapper;
 import com.storeapi.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +30,7 @@ public class UserServices {
   }
 
   public User findById(long userId) {
-    return userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found" ));
+    return userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("User not found" ));
   }
 
   public User save(RegisterUserRequest request) {
@@ -43,13 +44,13 @@ public class UserServices {
   }
 
   public User update(Long userId, UpdateUserRequest request) {
-    User savedUser = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found" ));
+    User savedUser = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("User not found" ));
     userMapper.updateEntity(request, savedUser);
     return userRepository.save(savedUser);
   }
 
   public void delete(Long userId) {
-    User savedUser = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found" ));
+    User savedUser = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("User not found" ));
     userRepository.delete(savedUser);
   }
 

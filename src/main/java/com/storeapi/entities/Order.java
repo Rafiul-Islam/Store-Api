@@ -43,8 +43,6 @@ public class Order {
     order.setStatus(OrderStatus.PENDING);
     order.setTotalPrice(cart.getTotal());
 
-    if (cart.getCartItems().isEmpty()) throw new RuntimeException("Cart is empty");
-
     cart.getCartItems().forEach(cartItem -> {
       OrderItem orderItem = new OrderItem(order, cartItem.getProduct(), cartItem.getQuantity());
       order.items.add(orderItem);

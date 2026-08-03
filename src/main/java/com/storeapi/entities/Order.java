@@ -37,9 +37,20 @@ public class Order {
   @OneToMany(mappedBy = "order", cascade = CascadeType.PERSIST)
   private Set<OrderItem> items = new HashSet<>();
 
-  public void addOrderItem(OrderItem orderItem) {
-    items.add(orderItem);
-    orderItem.setOrder(this);
+  public static Order frommCart(Cart cart, User customer) {
+    Order order = new Order();
+    order.setCustomer(customer);
+    order.setStatus(OrderStatus.PENDING);
+    order.setTotalPrice(cart.getTotal());
+
+    if (cart.getCartItems().isEmpty()) throw new RuntimeException("Cart is empty");
+
+    cart.getCartItems().forEach(cartItem -> {
+      OrderItem orderItem = new OrderItem(order, cartItem.getProduct(), cartItem.getQuantity());
+      order.items.add(orderItem);
+    });
+
+    return order;
   }
 
 }

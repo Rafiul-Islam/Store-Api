@@ -34,7 +34,7 @@ public class Order {
   @Column(name = "created_at", insertable = false, updatable = false)
   private LocalDateTime createdAt;
 
-  @OneToMany(mappedBy = "order", cascade = CascadeType.PERSIST)
+  @OneToMany(mappedBy = "order", cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
   private Set<OrderItem> items = new HashSet<>();
 
   public static Order frommCart(Cart cart, User customer) {

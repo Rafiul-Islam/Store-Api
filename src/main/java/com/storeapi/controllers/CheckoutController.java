@@ -3,6 +3,7 @@ package com.storeapi.controllers;
 import com.storeapi.dtos.CheckoutRequest;
 import com.storeapi.dtos.CheckoutResponse;
 import com.storeapi.services.CheckoutService;
+import com.stripe.exception.StripeException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -20,9 +21,9 @@ public class CheckoutController {
   @PostMapping
   public ResponseEntity<CheckoutResponse> checkout(
     @Valid @RequestBody CheckoutRequest checkoutRequest
-  ) {
-    long orderId = checkoutService.checkout(checkoutRequest);
-    return ResponseEntity.ok(new CheckoutResponse(orderId));
+  ) throws StripeException {
+    CheckoutResponse checkoutResponse = checkoutService.checkout(checkoutRequest);
+    return ResponseEntity.ok(checkoutResponse);
   }
 
 }

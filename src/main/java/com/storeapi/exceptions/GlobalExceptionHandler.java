@@ -32,6 +32,14 @@ public class GlobalExceptionHandler {
     );
   }
 
+  @ExceptionHandler({StripeCheckoutException.class})
+  public ResponseEntity<Map<String, String>> handleStripeCheckoutException(StripeCheckoutException exception) {
+    log.error("StripeCheckoutException: {}", exception.getMessage());
+    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+      Map.of("error", exception.getMessage())
+    );
+  }
+
   @ExceptionHandler(MethodArgumentNotValidException.class)
   public ResponseEntity<Map<String, String>> handleValidationExceptions(MethodArgumentNotValidException exception) {
     Map<String, String> exceptions = new HashMap<>();

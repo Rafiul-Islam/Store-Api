@@ -25,3 +25,6 @@ server:
 
 stripe:
     secretKey: ${STRIPE_SECRET_KEY}
+
+website:
+  url: ${WEBSITE_URL}

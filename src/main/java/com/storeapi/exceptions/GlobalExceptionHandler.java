@@ -32,9 +32,9 @@ public class GlobalExceptionHandler {
     );
   }
 
-  @ExceptionHandler({StripeCheckoutException.class})
-  public ResponseEntity<Map<String, String>> handleStripeCheckoutException(StripeCheckoutException exception) {
-    log.error("StripeCheckoutException: {}", exception.getMessage());
+  @ExceptionHandler({PaymentGatewayException.class})
+  public ResponseEntity<Map<String, String>> handleStripeCheckoutException(PaymentGatewayException exception) {
+    log.error("PaymentGatewayException: {}", exception.getMessage());
     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
       Map.of("error", exception.getMessage())
     );

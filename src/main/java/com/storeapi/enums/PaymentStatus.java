@@ -1,6 +1,6 @@
 package com.storeapi.enums;
 
-public enum OrderStatus {
+public enum PaymentStatus {
   PENDING,
   PAID,
   FAILED,

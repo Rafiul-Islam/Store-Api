@@ -1,6 +1,6 @@
 package com.storeapi.dtos;
 
-import com.storeapi.enums.OrderStatus;
+import com.storeapi.enums.PaymentStatus;
 import lombok.Data;
 
 import java.math.BigDecimal;
@@ -10,7 +10,7 @@ import java.util.List;
 @Data
 public class OrderDto {
   private long id;
-  private OrderStatus status;
+  private PaymentStatus status;
   private LocalDateTime createdAt;
   private List<OrderItemDto> items;
   private BigDecimal totalPrice;

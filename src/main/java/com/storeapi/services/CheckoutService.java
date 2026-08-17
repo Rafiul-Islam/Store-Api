@@ -1,19 +1,26 @@
 package com.storeapi.services;
 
-import com.storeapi.dtos.CheckoutRequest;
-import com.storeapi.dtos.CheckoutResponse;
-import com.storeapi.dtos.CheckoutSession;
+import com.storeapi.dtos.*;
 import com.storeapi.entities.Cart;
 import com.storeapi.entities.Order;
 import com.storeapi.entities.User;
+import com.storeapi.enums.PaymentStatus;
 import com.storeapi.exceptions.CartNotFoundException;
 import com.storeapi.exceptions.EmptyCartException;
 import com.storeapi.exceptions.PaymentGatewayException;
 import com.storeapi.exceptions.UserNotFoundException;
 import com.storeapi.repositories.OrderRepository;
+import com.stripe.exception.SignatureVerificationException;
+import com.stripe.model.Event;
+import com.stripe.model.PaymentIntent;
+import com.stripe.model.StripeObject;
+import com.stripe.net.Webhook;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
@@ -22,6 +29,8 @@ public class CheckoutService {
   private final AuthService authService;
   private final OrderRepository orderRepository;
   private final PaymentGateway paymentGateway;
+  private final OrderService orderService;
+  private final StripePaymentGateway stripePaymentGateway;
 
   @Transactional
   public CheckoutResponse checkout(CheckoutRequest checkoutRequest) {
@@ -40,5 +49,15 @@ public class CheckoutService {
       orderRepository.delete(order);
       throw new PaymentGatewayException(e.getMessage());
     }
+  }
+
+  public void handleWebHookEvent(WebhookRequest request) {
+    stripePaymentGateway.parseWebhookRequest(request)
+      .ifPresent(paymentResult -> {
+        orderService.getById(paymentResult.getOrderId()).ifPresent(order -> {
+          order.setStatus(paymentResult.getPaymentStatus());
+          orderService.save(order);
+        });
+      });
   }
 }

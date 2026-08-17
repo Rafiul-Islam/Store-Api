@@ -1,6 +1,6 @@
 package com.storeapi.entities;
 
-import com.storeapi.enums.OrderStatus;
+import com.storeapi.enums.PaymentStatus;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -26,7 +26,7 @@ public class Order {
 
   @Column(name = "status")
   @Enumerated(EnumType.STRING)
-  private OrderStatus status;
+  private PaymentStatus status;
 
   @Column(name = "total_price")
   private BigDecimal totalPrice;
@@ -40,7 +40,7 @@ public class Order {
   public static Order frommCart(Cart cart, User customer) {
     Order order = new Order();
     order.setCustomer(customer);
-    order.setStatus(OrderStatus.PENDING);
+    order.setStatus(PaymentStatus.PENDING);
     order.setTotalPrice(cart.getTotal());
 
     cart.getCartItems().forEach(cartItem -> {

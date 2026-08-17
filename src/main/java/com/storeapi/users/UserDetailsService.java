@@ -1,6 +1,5 @@
-package com.storeapi.services;
+package com.storeapi.users;
 
-import com.storeapi.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;

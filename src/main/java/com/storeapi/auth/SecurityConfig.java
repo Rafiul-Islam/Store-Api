@@ -1,7 +1,7 @@
 package com.storeapi.auth;
 
 import com.storeapi.users.Role;
-import com.storeapi.services.UserDetailsService;
+import com.storeapi.users.UserDetailsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

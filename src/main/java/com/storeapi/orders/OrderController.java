@@ -1,6 +1,5 @@
 package com.storeapi.orders;
 
-import com.storeapi.services.OrderService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

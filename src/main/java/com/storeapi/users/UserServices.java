@@ -1,13 +1,5 @@
-package com.storeapi.services;
+package com.storeapi.users;
 
-import com.storeapi.users.ChangePasswordRequest;
-import com.storeapi.users.RegisterUserRequest;
-import com.storeapi.users.UpdateUserRequest;
-import com.storeapi.users.User;
-import com.storeapi.users.Role;
-import com.storeapi.users.UserNotFoundException;
-import com.storeapi.users.UserMapper;
-import com.storeapi.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;

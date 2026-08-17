@@ -1,11 +1,6 @@
-package com.storeapi.services;
+package com.storeapi.products;
 
 import com.storeapi.carts.ProductDto;
-import com.storeapi.products.Category;
-import com.storeapi.products.Product;
-import com.storeapi.products.ProductMapper;
-import com.storeapi.repositories.CategoryRepository;
-import com.storeapi.repositories.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

@@ -1,6 +1,5 @@
-package com.storeapi.repositories;
+package com.storeapi.users;
 
-import com.storeapi.users.Address;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 

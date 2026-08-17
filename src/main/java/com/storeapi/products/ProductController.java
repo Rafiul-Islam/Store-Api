@@ -1,7 +1,6 @@
 package com.storeapi.products;
 
 import com.storeapi.carts.ProductDto;
-import com.storeapi.services.ProductService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;

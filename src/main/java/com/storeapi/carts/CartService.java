@@ -1,7 +1,7 @@
 package com.storeapi.carts;
 
 import com.storeapi.products.Product;
-import com.storeapi.services.ProductService;
+import com.storeapi.products.ProductService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

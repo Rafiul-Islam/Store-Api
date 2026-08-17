@@ -1,6 +1,5 @@
-package com.storeapi.repositories;
+package com.storeapi.products;
 
-import com.storeapi.products.Category;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 

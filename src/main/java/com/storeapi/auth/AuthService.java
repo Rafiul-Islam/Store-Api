@@ -2,8 +2,7 @@ package com.storeapi.auth;
 
 import com.storeapi.users.User;
 import com.storeapi.users.UserNotFoundException;
-import com.storeapi.repositories.ActiveTokenRepository;
-import com.storeapi.services.UserServices;
+import com.storeapi.users.UserServices;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;

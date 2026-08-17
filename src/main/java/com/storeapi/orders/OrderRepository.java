@@ -1,6 +1,5 @@
-package com.storeapi.repositories;
+package com.storeapi.orders;
 
-import com.storeapi.orders.Order;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

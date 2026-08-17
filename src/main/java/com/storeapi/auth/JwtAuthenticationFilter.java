@@ -1,6 +1,5 @@
 package com.storeapi.auth;
 
-import com.storeapi.repositories.ActiveTokenRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

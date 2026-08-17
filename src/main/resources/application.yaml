@@ -25,6 +25,7 @@ server:
 
 stripe:
     secretKey: ${STRIPE_SECRET_KEY}
+    webhookSecret: ${STRIPE_WEBHOOK_SECRET_KEY}
 
 website:
   url: ${WEBSITE_URL}

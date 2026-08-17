@@ -38,9 +38,10 @@ public class SecurityConfig {
       .authorizeHttpRequests(auth ->
         auth
           .requestMatchers("/api/auth/login").permitAll()
-          .requestMatchers("/api/admin/**").hasRole(Role.ADMIN.name())
           .requestMatchers("/api/auth/refresh").permitAll()
           .requestMatchers("/api/carts/**").permitAll()
+          .requestMatchers("/api/admin/**").hasRole(Role.ADMIN.name())
+          .requestMatchers(HttpMethod.POST, "/api/checkout/webhook").permitAll()
           .requestMatchers(HttpMethod.POST, "/api/users").permitAll()
           .anyRequest().authenticated()
       )

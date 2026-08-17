@@ -1,6 +1,6 @@
 package com.storeapi.services;
 
-import com.storeapi.entities.Order;
+import com.storeapi.orders.Order;
 import com.storeapi.repositories.OrderRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

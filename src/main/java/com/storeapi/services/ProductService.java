@@ -1,9 +1,9 @@
 package com.storeapi.services;
 
-import com.storeapi.dtos.ProductDto;
-import com.storeapi.entities.Category;
-import com.storeapi.entities.Product;
-import com.storeapi.mappers.ProductMapper;
+import com.storeapi.carts.ProductDto;
+import com.storeapi.products.Category;
+import com.storeapi.products.Product;
+import com.storeapi.products.ProductMapper;
 import com.storeapi.repositories.CategoryRepository;
 import com.storeapi.repositories.ProductRepository;
 import lombok.RequiredArgsConstructor;

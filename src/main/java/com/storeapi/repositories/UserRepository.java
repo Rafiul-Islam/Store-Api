@@ -1,7 +1,7 @@
 package com.storeapi.repositories;
 
 
-import com.storeapi.entities.User;
+import com.storeapi.users.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

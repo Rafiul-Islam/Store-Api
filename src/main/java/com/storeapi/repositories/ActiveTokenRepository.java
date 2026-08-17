@@ -1,6 +1,6 @@
 package com.storeapi.repositories;
 
-import com.storeapi.entities.ActiveToken;
+import com.storeapi.auth.ActiveToken;
 import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;

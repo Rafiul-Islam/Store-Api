@@ -1,12 +1,12 @@
 package com.storeapi.services;
 
-import com.storeapi.dtos.ChangePasswordRequest;
-import com.storeapi.dtos.RegisterUserRequest;
-import com.storeapi.dtos.UpdateUserRequest;
-import com.storeapi.entities.User;
-import com.storeapi.enums.Role;
-import com.storeapi.exceptions.UserNotFoundException;
-import com.storeapi.mappers.UserMapper;
+import com.storeapi.users.ChangePasswordRequest;
+import com.storeapi.users.RegisterUserRequest;
+import com.storeapi.users.UpdateUserRequest;
+import com.storeapi.users.User;
+import com.storeapi.users.Role;
+import com.storeapi.users.UserNotFoundException;
+import com.storeapi.users.UserMapper;
 import com.storeapi.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;

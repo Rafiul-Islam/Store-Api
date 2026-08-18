@@ -1,20 +1,12 @@
 spring:
   application:
     name: store-api
-  datasource:
-    url: jdbc:mysql://localhost:3306/store_api?createDatabaseIfNotExist=true
-    username: root
-    password: 1234
-    driver-class-name: com.mysql.cj.jdbc.Driver
-  jpa:
-    show-sql: true
-    hibernate:
-      ddl-auto: update
   jwt:
     secret: ${JWT_SECRET}
     accessTokenExpirationInSeconds: ${JWT_ACCESS_TOKEN_EXPIRATION_IN_SEC}
     refreshTokenExpirationInSeconds: ${JWT_REFRESH_TOKEN_EXPIRATION_IN_SEC}
-
+  profiles:
+    active: dev
 
 springdoc:
   swagger-ui:
@@ -26,6 +18,3 @@ server:
 stripe:
     secretKey: ${STRIPE_SECRET_KEY}
     webhookSecret: ${STRIPE_WEBHOOK_SECRET_KEY}
-
-website:
-  url: ${WEBSITE_URL}
